@@ -1,21 +1,27 @@
 <odoo>
   <data>
-    <record id="inherit_mrp_unbuild_form_view" model="ir.ui.view">
-    <field name="name">inherit.mrp.unbuild.form</field>
-    <field name="model">mrp.unbuild</field>
-    <field name="inherit_id" ref="mrp.mrp_unbuild_form_view"/>
-    <field name="arch" type="xml">
-        <!-- Insert the notebook just before the end of the sheet tag -->
-        <sheet position="before">
-            <notebook>
-                <!-- Example page -->
-                <page string="Additional Information">
-                    <!-- Here you can add new fields or groups of fields -->
-                    <field name="consume_line_ids"/>
-                </page>
-            </notebook>
-        </sheet>
-    </field>
-</record>
+     <record id="inherit_mrp_unbuild_form_view" model="ir.ui.view">
+            <field name="name">inherit.mrp.unbuild.form</field>
+            <field name="model">mrp.unbuild</field>
+            <field name="inherit_id" ref="mrp.mrp_unbuild_form_view"/>
+            <field name="arch" type="xml">
+                <!-- Insert the notebook just before the end of the sheet tag -->
+                <xpath expr="//sheet" position="inside">
+                    <notebook>
+                        <page string="Additional Information">
+                            <field name="detailed_list_ids">
+                                <tree editable="bottom">  <!-- Permite la edición en línea -->
+                                    <field name="product_id" string="Producto/>
+                                    <field name="qty string="Cantidad"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </xpath>
+                <xpath expr="//field[@name='bom_id']" position="replace">
+                    <field name="bom_id" invisible="mo_id and not mo_bom_id" readonly="mo_id or state == 'done'" required="False" force_save="1"/>
+                </xpath>
+            </field>
+        </record>
   </data>
 </odoo>
