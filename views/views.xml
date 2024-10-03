@@ -1,0 +1,21 @@
+<odoo>
+  <data>
+    <record id="inherit_mrp_unbuild_form_view" model="ir.ui.view">
+    <field name="name">inherit.mrp.unbuild.form</field>
+    <field name="model">mrp.unbuild</field>
+    <field name="inherit_id" ref="mrp.mrp_unbuild_form_view"/>
+    <field name="arch" type="xml">
+        <!-- Insert the notebook just before the end of the sheet tag -->
+        <sheet position="before">
+            <notebook>
+                <!-- Example page -->
+                <page string="Additional Information">
+                    <!-- Here you can add new fields or groups of fields -->
+                    <field name="consume_line_ids"/>
+                </page>
+            </notebook>
+        </sheet>
+    </field>
+</record>
+  </data>
+</odoo>
