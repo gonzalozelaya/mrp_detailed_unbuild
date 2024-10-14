@@ -1,20 +1,47 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api
+from odoo import models, fields, api, Command, _
 from odoo.exceptions import UserError
 class MrpUnbuild(models.Model):
     _inherit = "mrp.unbuild"
     
     detailed_list_ids = fields.One2many(
         'mrp.build.detailed_line', 'unbuild_id',
-        string='Detailed lists')
+        string='Detailed lists',
+        compute='_compute_detailed_list',
+        help='This lines are the ones the user has selected to be paid.',
+        readonly=False,
+        store=True
+    )
 
-    allow_adjustments = fields.Boolean('Allow adjustments', default = True)
+    allow_adjustments = fields.Boolean(string='Permitir ajustes', default = True)
 
+    @api.depends('bom_id','product_id')
+    def _compute_detailed_list(self):
+        for unbuild in self:
+            if unbuild.bom_id:
+               if unbuild.bom_id:
+                # Limpia las líneas existentes y agrega nuevas con Command
+                detailed_lines = self.env['mrp.build.detailed_line']
+                for bom_line in unbuild.bom_id.bom_line_ids:
+                    detailed_lines |= self.env['mrp.build.detailed_line'].create({
+                        'product_id': bom_line.product_id.id,
+                        'qty': bom_line.product_qty,
+                        'unbuild_id': unbuild.id
+                    })
+                
+                # Actualizar el campo One2many usando Command.clear() y Command.create()
+                unbuild.detailed_list_ids = [
+                    Command.clear(),  # Elimina todas las líneas anteriores
+                    Command.set(detailed_lines.ids)  # Agrega las nuevas líneas
+                ]
+            else:
+                 unbuild.detailed_list_ids = False
+                
     def _generate_consume_moves(self):
         moves = self.env['stock.move']
         for unbuild in self:
-            if unbuild.detailed_list_ids:
+            if unbuild.detailed_list_ids and unbuild.allow_adjustments:
                 moves += unbuild._generate_move_from_bom_line(self.product_id, self.product_uom_id, unbuild.product_qty)
             elif unbuild.mo_id:
                 finished_moves = unbuild.mo_id.move_finished_ids.filtered(lambda move: move.state == 'done')
@@ -34,7 +61,7 @@ class MrpUnbuild(models.Model):
     def _generate_produce_moves(self):
         moves = self.env['stock.move']
         for unbuild in self:
-            if unbuild.detailed_list_ids:
+            if unbuild.detailed_list_ids and unbuild.allow_adjustments:
                 for line in unbuild.detailed_list_ids:
                      moves += unbuild._generate_move_from_bom_line(line.product_id, line.product_uom_id, line.qty, isProduce=True)
             elif unbuild.mo_id:
@@ -51,7 +78,7 @@ class MrpUnbuild(models.Model):
 
     def _generate_move_from_bom_line(self, product, product_uom, quantity, bom_line_id=False, byproduct_id=False, isProduce=False):
         product_prod_location = product.with_company(self.company_id).property_stock_production
-        if self.detailed_list_ids and isProduce:
+        if self.detailed_list_ids and isProduce and self.allow_adjustments:
             location_id = product_prod_location
             location_dest_id = self.location_id
         else:

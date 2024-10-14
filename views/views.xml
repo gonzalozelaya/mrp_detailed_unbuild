@@ -7,12 +7,13 @@
             <field name="arch" type="xml">
                 <!-- Insert the notebook just before the end of the sheet tag -->
                 <xpath expr="//sheet" position="inside">
+                    <field name="allow_adjustments" string="Ajuste manual"/>
                     <notebook>
                         <page string="Additional Information">
-                            <field name="detailed_list_ids">
+                            <field name="detailed_list_ids" readonly="not allow_adjustments">
                                 <tree editable="bottom">  <!-- Permite la edición en línea -->
-                                    <field name="product_id" string="Producto/>
-                                    <field name="qty string="Cantidad"/>
+                                    <field name="product_id" string="Producto"/>
+                                    <field name="qty" string="Cantidad"/>
                                 </tree>
                             </field>
                         </page>
