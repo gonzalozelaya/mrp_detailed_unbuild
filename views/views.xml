@@ -6,22 +6,24 @@
             <field name="inherit_id" ref="mrp.mrp_unbuild_form_view"/>
             <field name="arch" type="xml">
                 <!-- Insert the notebook just before the end of the sheet tag -->
-                <xpath expr="//sheet" position="inside">
+                  <xpath expr="//field[@name='bom_id']" position="after">
                     <field name="allow_adjustments" string="Ajuste manual"/>
-                    <notebook>
-                        <page string="Additional Information">
-                            <field name="detailed_list_ids" readonly="not allow_adjustments">
-                                <tree editable="bottom">  <!-- Permite la edición en línea -->
-                                    <field name="product_id" string="Producto"/>
-                                    <field name="qty" string="Cantidad"/>
-                                </tree>
-                            </field>
-                        </page>
-                    </notebook>
-                </xpath>
-                <xpath expr="//field[@name='bom_id']" position="replace">
-                    <field name="bom_id" invisible="mo_id and not mo_bom_id" readonly="mo_id or state == 'done'" required="False" force_save="1"/>
-                </xpath>
+                    </xpath>
+                    <xpath expr="//sheet" position="inside">
+                        <notebook invisible="not allow_adjustments">
+                            <page string="Additional Information">
+                                <field name="detailed_list_ids" readonly="not allow_adjustments">
+                                    <tree editable="bottom">  <!-- Permite la edición en línea -->
+                                        <field name="product_id" string="Producto"/>
+                                        <field name="qty" string="Cantidad"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </xpath>
+                    <xpath expr="//field[@name='bom_id']" position="replace">
+                        <field name="bom_id" invisible="mo_id and not mo_bom_id" readonly="mo_id or state == 'done'" required="False" force_save="1"/>
+                    </xpath>
             </field>
         </record>
   </data>
